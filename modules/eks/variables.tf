@@ -46,4 +46,13 @@ variable "cluster_tag" {
   type        = string
   default     = "Cluster1"
 }
+variable "eks_role_name" {
+  description = "The name of the EKS role."
+  type        = string
+  default     = "EKSRole"
+}
+variable "cluster_role_name" {
+  description = "The name of the IAM role for the EKS cluster."
+  type        = string
+}
 
