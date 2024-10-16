@@ -21,4 +21,3 @@ variable "node_role_tag" {
   type        = string
   default     = "NodeGroup"
 }
-
