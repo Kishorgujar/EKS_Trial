@@ -1,20 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-
-  required_version = ">= 1.9.0"
-}
-
-#Provider
-provider "aws" {
-  region = var.region
-}
-
-
 # Public VPC
 resource "aws_vpc" "public_vpc" {
   cidr_block = var.vpc_cidr
@@ -27,23 +10,22 @@ resource "aws_vpc" "public_vpc" {
 
 # Public Subnets
 resource "aws_subnet" "public_pub_sub1" {
-    count = length(var.public_subnet1_cidrs)
+  count = length(var.public_pub_subnet1_cidrs)
   vpc_id            = aws_vpc.public_vpc.id
-  cidr_block        = element(var.public_subnet1_cidrs, count.index)
-  availability_zone = element(var.public_subnet1_cidrs, count.index)
+  cidr_block        = element(var.public_pub_subnet1_cidrs, count.index)
+  availability_zone = element(var.azs, count.index)  # First AZ for Subnet 1
   tags = {
-    Name = "Public_Pub_Sub1"
+    Name = "Public_Pub_Sub1-${count.index}"
   }
 }
 
-# Public Subnets
 resource "aws_subnet" "public_pub_sub2" {
-    count = length(var.public_subnet2_cidrs)
+  count = length(var.public_pub_subnet2_cidrs)
   vpc_id            = aws_vpc.public_vpc.id 
-  cidr_block        = element(var.public_subnet2_cidrs, count.index)
-  availability_zone = element(var.public_subnet2_cidrs, count.index)
+  cidr_block        = element(var.public_pub_subnet2_cidrs, count.index)
+  availability_zone = element(var.azs, count.index + length(var.public_pub_subnet1_cidrs))  # Second AZ for Subnet 2
   tags = {
-    Name = "Public_Pub_Sub2"
+    Name = "Public_Pub_Sub2-${count.index}"
   }
 }
 
@@ -77,8 +59,8 @@ resource "aws_route_table_association" "public_pub_sub_association1" {
 }
 
 resource "aws_route_table_association" "public_pub_sub_association2" {
-  count     = length(aws_subnet.public_pub_sub1)  # Ensure this matches your subnet count
-  subnet_id      = aws_subnet.public_pub_sub1[count.index].id
+  count     = length(aws_subnet.public_pub_sub2)  # Ensure this matches your subnet count
+  subnet_id      = aws_subnet.public_pub_sub2[count.index].id
   route_table_id = aws_route_table.public_pub_route2.id
 }
 
@@ -93,5 +75,3 @@ resource "aws_route" "public_route2" {
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.public_igw.id
 }
-
-
