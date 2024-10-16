@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.region
-}
-
 resource "aws_eks_cluster" "this" {
   name     = var.cluster_name
   role_arn = var.cluster_role_arn
@@ -22,12 +18,17 @@ resource "aws_eks_cluster" "this" {
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
-  role       = var.cluster_role_arn
+  role       = var.cluster_role_name 
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "eks_service_policy" {
-  role       = var.cluster_role_arn
+  role       = var.cluster_role_name 
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
 }
 
+resource "aws_cloudwatch_log_group" "EKS_CLUSTER_LOGS" {
+  # The log group name format is /aws/eks/<cluster-name>/cluster
+  name              = "/aws/eks/${var.cluster_name}/cluster"
+  retention_in_days = 7
+}
